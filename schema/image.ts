@@ -1,15 +1,28 @@
 import "dotenv/config";
 import { permissions } from "./../access";
 import { list } from "@keystone-6/core";
-import { image, text } from "@keystone-6/core/fields";
+import { text } from "@keystone-6/core/fields";
 import { deleteLocalImage } from "../lib/deleteLocalImage";
+import { cloudinaryImage } from "@keystone-6/cloudinary";
+import { cloudinary } from "./../config";
+import { afterDeleteCloudinaryImage } from "../lib/afterDeleteFieldHooks";
 
 export const Image = list({
   ui: {
     isHidden: (args) => !permissions.canManageImages(args),
   },
   fields: {
-    image: image(),
+    image: cloudinaryImage({
+      cloudinary,
+      label: "User Profile Image",
+      hooks: {
+        afterOperation: async ({ operation, originalItem, fieldKey }) => {
+          if (operation === "update" || operation === "delete") {
+            await afterDeleteCloudinaryImage(originalItem, fieldKey);
+          }
+        },
+      },
+    }),
     name: text({
       label: "Image name",
       validation: {
@@ -19,19 +32,9 @@ export const Image = list({
     altText: text(),
   },
   hooks: {
-    afterOperation: async ({ operation, originalItem, item }) => {
-      if (operation === "update") {
-        if (
-          (!item.image_id && originalItem.image_id) ||
-          (item.image_id !== originalItem.image_id && originalItem.image_id)
-        ) {
-          deleteLocalImage("/assets/images", originalItem.image_id);
-        }
-      }
-      if (operation === "delete") {
-        if (originalItem.image_id) {
-          deleteLocalImage("/assets/images", originalItem.image_id);
-        }
+    afterOperation: async ({ operation, originalItem }) => {
+      if (operation === "update" || operation === "delete") {
+        await afterDeleteCloudinaryImage(originalItem, "image");
       }
     },
   },

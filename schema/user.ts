@@ -1,7 +1,9 @@
 import { fieldModes, permissions, rules } from "./../access";
 import { list } from "@keystone-6/core";
-import { text, relationship, password, image } from "@keystone-6/core/fields";
-import { deleteLocalImage } from "../lib/deleteLocalImage";
+import { text, relationship, password } from "@keystone-6/core/fields";
+import { cloudinaryImage } from "@keystone-6/cloudinary";
+import { cloudinary } from "./../config";
+import { afterDeleteCloudinaryImage } from "../lib/afterDeleteFieldHooks";
 
 export const User = list({
   access: {
@@ -21,19 +23,9 @@ export const User = list({
     },
   },
   hooks: {
-    afterOperation: async ({ operation, originalItem, item }) => {
-      if (operation === "update") {
-        if (
-          (!item.image_id && originalItem.image_id) ||
-          (item.image_id !== originalItem.image_id && originalItem.image_id)
-        ) {
-          deleteLocalImage("/assets/images", originalItem.image_id);
-        }
-      }
-      if (operation === "delete") {
-        if (originalItem.image_id) {
-          deleteLocalImage("/assets/images", originalItem.image_id);
-        }
+    afterOperation: async ({ operation, originalItem }) => {
+      if (operation === "update" || operation === "delete") {
+        await afterDeleteCloudinaryImage(originalItem, "image");
       }
     },
   },
@@ -54,7 +46,17 @@ export const User = list({
         itemView: { fieldMode: fieldModes.editSelfOrHidden },
       },
     }),
-    image: image(),
+    image: cloudinaryImage({
+      cloudinary,
+      label: "Image",
+      hooks: {
+        afterOperation: async ({ operation, originalItem, fieldKey }) => {
+          if (operation === "update" || operation === "delete") {
+            await afterDeleteCloudinaryImage(originalItem, fieldKey);
+          }
+        },
+      },
+    }),
     posts: relationship({
       ref: "Post.author",
       many: true,

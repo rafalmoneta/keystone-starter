@@ -12,19 +12,14 @@ generator client {
 }
 
 model User {
-  id              String  @id @default(cuid())
-  name            String  @default("")
-  email           String  @unique @default("")
-  password        String
-  image_filesize  Int?
-  image_extension String?
-  image_width     Int?
-  image_height    Int?
-  image_mode      String?
-  image_id        String?
-  posts           Post[]  @relation("Post_author")
-  role            Role?   @relation("User_role", fields: [roleId], references: [id])
-  roleId          String? @map("role")
+  id       String  @id @default(cuid())
+  name     String  @default("")
+  email    String  @unique @default("")
+  password String
+  image    Json?
+  posts    Post[]  @relation("Post_author")
+  role     Role?   @relation("User_role", fields: [roleId], references: [id])
+  roleId   String? @map("role")
 
   @@index([roleId])
 }
@@ -50,15 +45,10 @@ model Tag {
 }
 
 model Image {
-  id              String  @id @default(cuid())
-  image_filesize  Int?
-  image_extension String?
-  image_width     Int?
-  image_height    Int?
-  image_mode      String?
-  image_id        String?
-  name            String  @default("")
-  altText         String  @default("")
+  id      String @id @default(cuid())
+  image   Json?
+  name    String @default("")
+  altText String @default("")
 }
 
 model Role {

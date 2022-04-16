@@ -71,19 +71,17 @@ export default function Gallery({
   );
 
   const GET_IMAGES = gql`
-    query ${list.gqlNames.listQueryName}($take: Int, $skip: Int) {
-      ${list.gqlNames.listQueryName}(orderBy: [{ id: desc }], take: $take, skip: $skip) {
-        id
-        name
-        image {
-          id
-          ref
-          url
-        }
+  query ${list.gqlNames.listQueryName}($take: Int, $skip: Int) {
+    ${list.gqlNames.listQueryName}(orderBy: [{ id: desc }], take: $take, skip: $skip) {
+      id
+      name
+      image {
+        publicUrlTransformed
       }
-      ${list.gqlNames.listQueryCountName}
     }
-  `;
+    ${list.gqlNames.listQueryCountName}
+  }
+`;
 
   const DELETE_IMAGES = gql`
     mutation ${list.gqlNames.deleteManyMutationName}($where: [${list.gqlNames.whereUniqueInputName}!]!) {

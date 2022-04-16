@@ -18,7 +18,7 @@ export default function UploadFile({
 
   const UPLOAD_IMAGE = gql`
     mutation ${list.gqlNames.createMutationName}($name: String, $file: Upload) {
-      ${list.gqlNames.createMutationName}(data: { image: { upload: $file}, name: $name }) {
+      ${list.gqlNames.createMutationName}(data: { image: $file, name: $name }) {
         id
       }
     }

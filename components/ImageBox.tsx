@@ -77,8 +77,7 @@ export const ImageBox = ({
         }}
         // TODO: Fix types
         // @ts-ignore
-        src={item.image?.url}
-        // src={item.image?.publicUrlTransformed}
+        src={item.image?.publicUrlTransformed}
         alt={item.id}
       />
     </div>
